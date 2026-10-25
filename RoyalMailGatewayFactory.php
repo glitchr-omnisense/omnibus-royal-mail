@@ -33,7 +33,7 @@ final class RoyalMailGatewayFactory extends GatewayFactory
                 return new Api($http, (string) $c['api_key'], $c['tracking_client_id'] ?: null, $c['tracking_client_secret'] ?: null);
             },
             'omnibus.action.shipping' => new ShippingAction(),
-            'omnibus.action.tracking' => new TrackingAction(),
+            'omnibus.action.tracking' => static fn (Config $c) => $c['tracking_client_id'] && $c['tracking_client_secret'] ? new TrackingAction() : null, // the Tracking API has credentials of its own
         ]);
     }
 }

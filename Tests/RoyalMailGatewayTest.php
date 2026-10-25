@@ -63,7 +63,7 @@ final class RoyalMailGatewayTest extends TestCase
         self::assertSame('Item received', $tracking->events[0]->description);
         self::assertContains('X-IBM-Client-Id: tc', $this->calls[0][3]);
 
-        $this->expectException(CarrierException::class);
+        $this->expectException(\Omnibus\Exception\RequestNotSupportedException::class); // without its option, not offered
         $this->gateway(false)->track('KL123456789GB');
     }
 
