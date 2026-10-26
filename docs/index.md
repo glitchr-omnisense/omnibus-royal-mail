@@ -1,6 +1,6 @@
 # omnibus/royal-mail
 
-Royal Mail for [omniscient/omnibus](https://github.com/glitchr-studio/omnibus): orders with their
+Royal Mail for [omnisense/omnibus](https://github.com/glitchr-omnisense/omnibus): orders with their
 postage and PDF labels through the Click & Drop API, tracking through Royal Mail's Tracking API v2
 (its own credentials). Click & Drop quotes no prices: they come from the `rates` option. The
 gateway calls:
@@ -19,7 +19,7 @@ There is no sandbox address. Every call has a 20-second timeout.
 composer require omnibus/royal-mail
 ```
 
-Requires PHP 8.2, `omniscient/omnibus` (2.x) and `symfony/http-client` (6.4, 7 or 8); given no
+Requires PHP 8.2, `omnisense/omnibus` (2.x) and `symfony/http-client` (6.4, 7 or 8); given no
 HTTP client, the factory makes one with `HttpClient::create()`. In a Symfony application with
 `Omnibus\Bridge\Symfony\OmnibusBundle`, the factory is registered as soon as the package is
 installed.
@@ -40,7 +40,7 @@ installed.
 | `api_key` | string | - | yes | the Click & Drop API key |
 | `tracking_client_id` | ?string | `null` | no | the Tracking API's client id |
 | `tracking_client_secret` | ?string | `null` | no | the Tracking API's client secret |
-| `rates` | list | - | no | the only way this gateway rates ([the rates option](https://github.com/glitchr-studio/omnibus/blob/2.x/docs/configuration.md#the-rates-option)) |
+| `rates` | list | - | no | the only way this gateway rates ([the rates option](https://github.com/glitchr-omnisense/omnibus/blob/2.x/docs/configuration.md#the-rates-option)) |
 
 Shipment options read when booking (`Shipment::$options`):
 

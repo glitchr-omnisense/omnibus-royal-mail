@@ -1,6 +1,6 @@
 # omnibus/royal-mail
 
-Royal Mail for [omniscient/omnibus](https://github.com/glitchr-studio/omnibus): orders with their
+Royal Mail for [omnisense/omnibus](https://github.com/glitchr-omnisense/omnibus): orders with their
 postage and labels through Click & Drop, tracking through the Tracking API. Prices come from
 configuration (`rates`): Click & Drop quotes none.
 
@@ -8,7 +8,7 @@ configuration (`rates`): Click & Drop quotes none.
 $gateway = (new RoyalMailGatewayFactory($http))->create($options);   // $http: the application's HTTP client - none given, the factory makes its own; the options below
 ```
 
-No framework needed: the package requires `omniscient/omnibus` and `symfony/http-client`. In a
+No framework needed: the package requires `omnisense/omnibus` and `symfony/http-client`. In a
 Symfony application, the same through the bundle's configuration:
 
 ```yaml
