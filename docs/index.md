@@ -80,8 +80,9 @@ When no order comes back, the first failed order's first error is raised. The tr
 the created order's `trackingNumber`, else its `orderIdentifier`. Then the postage label is asked
 for (`documentType=postageLabel`); a PDF answer is the label's `content`. Click & Drop makes the
 label once the postage is applied: if that request fails, the booking still succeeds with no
-content, and this package has no way to ask for it again (`GetSlip` is not supported, although a
-comment in `ShippingAction` says it does). The format is `application/pdf`; `trackingUrl` is
+content; the order stays in Click & Drop, where its label is printed (`GetSlip` is not
+supported: Click & Drop finds an order by its identifier or reference, not by its tracking
+number). The format is `application/pdf`; `trackingUrl` is
 `https://www.royalmail.com/track-your-item#/tracking-results/<number>`. `pickupPoint` is not sent.
 
 **Track.** The mail piece's events (`mailPieces`, else the answer itself): their `eventDateTime`,

@@ -59,7 +59,8 @@ final class ShippingAction implements ActionInterface, ApiAwareInterface
         try {
             $label = $this->api->call('GET', '/orders/'.rawurlencode((string) $order['orderIdentifier']).'/label', null, ['documentType' => 'postageLabel'])['content'] ?? null;
         } catch (CarrierException) {
-            // Not yet: a label is made once the postage is applied; the order stays, GetSlip asks again.
+            // Not yet: a label is made once the postage is applied. The order stays in Click & Drop,
+            // where its label is printed (no GetSlip: Click & Drop finds no order by tracking number).
         }
         $request->setResult(new Label('royal_mail', $number, $label, Label::PDF, null, 'https://www.royalmail.com/track-your-item#/tracking-results/'.rawurlencode($number)));
     }
