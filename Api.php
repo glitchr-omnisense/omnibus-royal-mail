@@ -3,6 +3,7 @@
 namespace Omnibus\RoyalMail;
 
 use Omnibus\Exception\CarrierException;
+use Omnibus\Http\Redaction;
 use Symfony\Contracts\HttpClient\Exception\ExceptionInterface as HttpExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -39,17 +40,19 @@ final class Api
             $content = $response->getContent(false);
             $type = $response->getHeaders(false)['content-type'][0] ?? '';
         } catch (HttpExceptionInterface|\JsonException $e) {
-            throw new CarrierException('royal_mail', 'Royal Mail request failed: '.$e->getMessage(), null, $e);
+            $secrets = $this->secrets();
+
+            throw Redaction::withoutArguments(new CarrierException('royal_mail', 'Royal Mail request failed: '.Redaction::text($e->getMessage(), $secrets), null, Redaction::copy($e, $secrets)));
         }
         if ($status < 400 && str_contains($type, 'pdf')) {
             return ['content' => $content];
         }
         $data = '' === $content ? [] : json_decode($content, true);
         if (!\is_array($data)) {
-            throw new CarrierException('royal_mail', sprintf('Royal Mail answered HTTP %d with a body that is not JSON.', $status));
+            throw Redaction::withoutArguments(new CarrierException('royal_mail', sprintf('Royal Mail answered HTTP %d with a body that is not JSON.', $status)));
         }
         if ($status >= 400) {
-            throw new CarrierException('royal_mail', (string) ($data['message'] ?? $data['errors'][0]['errorMessage'] ?? $data['title'] ?? sprintf('HTTP %d', $status)), isset($data['code']) ? (string) $data['code'] : null);
+            throw Redaction::withoutArguments(new CarrierException('royal_mail', (string) ($data['message'] ?? $data['errors'][0]['errorMessage'] ?? $data['title'] ?? sprintf('HTTP %d', $status)), isset($data['code']) ? (string) $data['code'] : null));
         }
 
         return $data;
@@ -64,19 +67,31 @@ final class Api
     public function track(string $number): array
     {
         if (!$this->canTrack()) {
-            throw new CarrierException('royal_mail', 'Tracking needs the Tracking API\'s credentials (options tracking_client_id and tracking_client_secret).');
+            throw Redaction::withoutArguments(new CarrierException('royal_mail', 'Tracking needs the Tracking API\'s credentials (options tracking_client_id and tracking_client_secret).'));
         }
         try {
             $response = $this->http->request('GET', self::TRACKING.'/'.rawurlencode($number).'/events', ['headers' => ['X-IBM-Client-Id' => $this->trackingClientId, 'X-IBM-Client-Secret' => $this->trackingClientSecret, 'Accept' => 'application/json', 'X-Accept-RMG-Terms' => 'yes'], 'timeout' => $this->timeout]);
             $status = $response->getStatusCode();
             $data = $response->toArray(false);
         } catch (HttpExceptionInterface $e) {
-            throw new CarrierException('royal_mail', 'Royal Mail tracking failed: '.$e->getMessage(), null, $e);
+            $secrets = $this->secrets();
+
+            throw Redaction::withoutArguments(new CarrierException('royal_mail', 'Royal Mail tracking failed: '.Redaction::text($e->getMessage(), $secrets), null, Redaction::copy($e, $secrets)));
         }
         if ($status >= 400) {
-            throw new CarrierException('royal_mail', (string) ($data['errors'][0]['errorDescription'] ?? $data['moreInformation'] ?? sprintf('HTTP %d', $status)), $data['errors'][0]['errorCode'] ?? $data['httpCode'] ?? null);
+            throw Redaction::withoutArguments(new CarrierException('royal_mail', (string) ($data['errors'][0]['errorDescription'] ?? $data['moreInformation'] ?? sprintf('HTTP %d', $status)), $data['errors'][0]['errorCode'] ?? $data['httpCode'] ?? null));
         }
 
         return $data;
+    }
+
+    /**
+     * What a failure must not carry: the credentials, and what a request made of them.
+     *
+     * @return list<string>
+     */
+    private function secrets(string ...$more): array
+    {
+        return [$this->apiKey, (string) $this->trackingClientSecret, ...$more];
     }
 }

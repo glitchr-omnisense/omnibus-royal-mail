@@ -185,6 +185,12 @@ is an `InvalidConfigException` when the gateway is built; `Tracking` without its
 `Pickup`, `GetSlip`, `Cancel`, `Paperless`, and `Rating` without `rates`, raise
 `RequestNotSupportedException` before any call.
 
+No failure carries the API key and the Tracking API's client secret: a network error's message has
+them masked as `***` (the key parameters of a URL too), its previous is a copy of the HTTP client's
+exception (the same class and code), and no trace of the chain keeps its arguments, where the
+request's options stood ([No secret in a
+failure](https://github.com/glitchr-omnisense/omnibus/blob/2.x/docs/errors.md#no-secret-in-a-failure)).
+
 ## Verified, and not
 
 Tested offline: `Tests/RoyalMailGatewayTest.php` (an order created with its label, the reference,
