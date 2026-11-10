@@ -4,6 +4,8 @@ namespace Omnibus\RoyalMail;
 
 use Omnibus\Exception\CarrierException;
 use Omnibus\Http\Redaction;
+use Omnibus\Http\Throttle;
+use Omnisense\Contracts\Policy\Backoff;
 use Symfony\Contracts\HttpClient\Exception\ExceptionInterface as HttpExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -23,6 +25,8 @@ final class Api
         private readonly ?string $trackingClientId = null,
         private readonly ?string $trackingClientSecret = null,
         private readonly int $timeout = 20,
+        /** The waits the carrier asks for (omnisense/contracts' Backoff): no call while one lasts, a 429 a RateLimitedException, never retried */
+        private readonly ?Backoff $backoff = null,
     ) {
     }
 
@@ -30,6 +34,7 @@ final class Api
     public function call(string $method, string $path, ?array $body = null, array $query = []): array
     {
         try {
+            Throttle::before($this->backoff);
             $response = $this->http->request($method, self::CLICK_AND_DROP.$path, [
                 'headers' => ['Authorization' => 'Bearer '.$this->apiKey, 'Content-Type' => 'application/json', 'Accept' => 'application/json, application/pdf'],
                 'query' => $query,
@@ -37,6 +42,7 @@ final class Api
                 'timeout' => $this->timeout,
             ]);
             $status = $response->getStatusCode();
+            Throttle::after($this->backoff, 'royal_mail', $status, $response->getHeaders(false));
             $content = $response->getContent(false);
             $type = $response->getHeaders(false)['content-type'][0] ?? '';
         } catch (HttpExceptionInterface|\JsonException $e) {
@@ -70,8 +76,10 @@ final class Api
             throw Redaction::withoutArguments(new CarrierException('royal_mail', 'Tracking needs the Tracking API\'s credentials (options tracking_client_id and tracking_client_secret).'));
         }
         try {
+            Throttle::before($this->backoff);
             $response = $this->http->request('GET', self::TRACKING.'/'.rawurlencode($number).'/events', ['headers' => ['X-IBM-Client-Id' => $this->trackingClientId, 'X-IBM-Client-Secret' => $this->trackingClientSecret, 'Accept' => 'application/json', 'X-Accept-RMG-Terms' => 'yes'], 'timeout' => $this->timeout]);
             $status = $response->getStatusCode();
+            Throttle::after($this->backoff, 'royal_mail', $status, $response->getHeaders(false));
             $data = $response->toArray(false);
         } catch (HttpExceptionInterface $e) {
             $secrets = $this->secrets();

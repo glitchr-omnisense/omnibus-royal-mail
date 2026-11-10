@@ -6,6 +6,7 @@ use Omnibus\Action\ActionInterface;
 use Omnibus\Action\ApiAwareInterface;
 use Omnibus\Action\ApiAwareTrait;
 use Omnibus\Exception\CarrierException;
+use Omnibus\Exception\UsageLimitReachedException;
 use Omnibus\Model\Label;
 use Omnibus\Request\Request;
 use Omnibus\Request\Shipping;
@@ -58,7 +59,7 @@ final class ShippingAction implements ActionInterface, ApiAwareInterface
         $label = null;
         try {
             $label = $this->api->call('GET', '/orders/'.rawurlencode((string) $order['orderIdentifier']).'/label', null, ['documentType' => 'postageLabel'])['content'] ?? null;
-        } catch (CarrierException) {
+        } catch (CarrierException|UsageLimitReachedException) {
             // Not yet: a label is made once the postage is applied. The order stays in Click & Drop,
             // where its label is printed (no GetSlip: Click & Drop finds no order by tracking number).
         }

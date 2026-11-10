@@ -24,13 +24,14 @@ final class RoyalMailGatewayFactory extends GatewayFactory
         $config->defaults([
             'omnibus.factory_name' => 'royal_mail',
             'omnibus.factory_title' => 'Royal Mail',
+            'omnibus.policy' => __DIR__.'/policy.json',
             'omnibus.required_options' => ['api_key'],
             'tracking_client_id' => null,
             'tracking_client_secret' => null,
             'omnibus.api' => function (Config $c) {
                 $http = $this->http ?? HttpClient::create();
 
-                return new Api($http, (string) $c['api_key'], $c['tracking_client_id'] ?: null, $c['tracking_client_secret'] ?: null);
+                return new Api($http, (string) $c['api_key'], $c['tracking_client_id'] ?: null, $c['tracking_client_secret'] ?: null, backoff: $c->backoff());
             },
             'omnibus.action.shipping' => new ShippingAction(),
             'omnibus.action.tracking' => static fn (Config $c) => $c['tracking_client_id'] && $c['tracking_client_secret'] ? new TrackingAction() : null, // the Tracking API has credentials of its own

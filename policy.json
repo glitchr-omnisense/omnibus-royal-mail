@@ -1,0 +1,38 @@
+{
+    "$schema": "https://github.com/glitchr-omnisense/contracts/blob/1.x/resources/usage-policy.schema.json",
+    "provider": "royal_mail",
+    "rateLimits": null,
+    "concurrency": null,
+    "rights": {
+        "commercial": "contract",
+        "openSourceRequired": false,
+        "caching": {
+            "permission": "unknown",
+            "maxTtl": null
+        },
+        "storage": "unknown",
+        "redistribution": "unknown",
+        "attribution": {
+            "required": false,
+            "text": null,
+            "url": null,
+            "where": []
+        },
+        "licence": null
+    },
+    "requirements": {
+        "key": true,
+        "userAgent": {
+            "required": false,
+            "pattern": null
+        }
+    },
+    "provenance": {
+        "terms": null,
+        "policy": null,
+        "verifiedAt": null,
+        "declaredBy": "maintainer",
+        "contact": "https://developer.royalmail.net/help",
+        "notes": "Not read on 2026-11-10: the Click & Drop help centre (terms, rate limits) answered 403, and Tracking API v2's plans show only after sign-in on developer.royalmail.net. \"2 API calls a second\" for Click & Drop was seen in a search result only, not declared. Click & Drop needs the account's API key, tracking a portal subscription. Idempotency of an order's orderReference not verified: an order is sent once."
+    }
+}
