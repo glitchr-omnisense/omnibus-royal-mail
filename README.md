@@ -4,6 +4,42 @@ Royal Mail for [omnisense/omnibus](https://github.com/glitchr-omnisense/omnibus)
 postage and labels through Click & Drop, tracking through the Tracking API. Prices come from
 configuration (`rates`): Click & Drop quotes none.
 
+## Install and a first call
+
+```sh
+composer require omnibus/royal-mail
+```
+
+No account for this first call: Royal Mail's answer is recorded
+(`Omnibus\Testing\RecordedHttpClient` answers in place of the API), so nothing leaves the process.
+With your own credentials, give the factory your HTTP client (or none: it makes its own) and drop
+the recorded one.
+
+```php
+<?php
+
+require __DIR__.'/vendor/autoload.php';
+
+use Omnibus\RoyalMail\RoyalMailGatewayFactory;
+use Omnibus\Testing\RecordedHttpClient;
+
+// Royal Mail's answer, recorded: no account, and nothing leaves the process.
+$http = new RecordedHttpClient([
+    'api.royalmail.net' => ['mailPieces' => ['mailPieceId' => 'KL123456789GB', 'summary' => ['lastEventCode' => 'EVKSP', 'statusDescription' => 'Delivered'], 'events' => [
+        ['eventCode' => 'EVKSP', 'eventName' => 'Delivered by', 'eventDateTime' => '2026-10-02T11:02:00+01:00', 'locationName' => 'Manchester DO'],
+    ]]],
+]);
+$gateway = (new RoyalMailGatewayFactory($http))->create(['api_key' => 'cd-key', 'tracking_client_id' => 'tc', 'tracking_client_secret' => 'ts']);
+
+$tracking = $gateway->track('KL123456789GB');
+echo $tracking->status->value, ' - ', $tracking->latest()?->description, "\n";   // delivered - Delivered by
+```
+
+A real call needs a Royal Mail account (the credentials below). The answer is shaped after Royal
+Mail's published documentation; the package has not been run against its service yet.
+
+## Configuration
+
 ```php
 $gateway = (new RoyalMailGatewayFactory($http))->create($options);   // $http: the application's HTTP client - none given, the factory makes its own; the options below
 ```
